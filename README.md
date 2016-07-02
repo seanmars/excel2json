@@ -7,3 +7,7 @@ Export the data with JSON format from excel;
 - Import excel, Export JSON;
 - Custom template;
 - Export JSON with prettify or minify;
+
+# To do list
+
+- CLI;

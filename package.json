@@ -2,6 +2,7 @@
     "name": "excel2json",
     "version": "1.0.0",
     "description": "Translate excel to json with template.",
+    "resporty"
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,12 +10,16 @@
     "author": "Sean Mars",
     "license": "Apache License 2.0",
     "bin": {
-        "jxcli": "./jxcli.js"
+        "e2j": "./e2j.js"
     },
     "dependencies": {
         "commander": "^2.9.0",
         "jsonfile": "^2.3.1",
         "underscore": "^1.8.3",
         "xlsx": "^0.8.0"
-    }
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:seanmars/excel2json.git"
+    },
 }
