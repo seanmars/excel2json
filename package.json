@@ -1,9 +1,9 @@
 {
     "name": "excel2json",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Translate excel to json with template.",
     "resporty"
-    "main": "index.js",
+    "main": "excel2json.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
