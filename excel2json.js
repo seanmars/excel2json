@@ -23,7 +23,6 @@ var excel2json = (function() {
      * @return Object
      */
     function loadSheet(filePath, sheet) {
-        console.log('Load file: ' + filePath);
         var workbook = XLSX.readFile(filePath);
         if (!workbook) {
             return;
@@ -253,7 +252,6 @@ var excel2json = (function() {
         }
 
         var range = XLSX.utils.decode_range(ref);
-        console.log(ref, range);
 
         // check the title cell is exists or not
         var titleCell = findTitleTagCell(ws, range, titleChar);
@@ -268,7 +266,10 @@ var excel2json = (function() {
         }
 
         var cells = [];
-        var result = [];
+        var result = {
+            name: sheetName,
+            datas: [],
+        };
         for (var ir = range.s.r; ir <= range.e.r; ++ir) {
             var data = {};
             for (var ic = range.s.c; ic <= range.e.c; ++ic) {
@@ -303,18 +304,8 @@ var excel2json = (function() {
                 continue;
             }
 
-            result.push(data);
+            result.datas.push(data);
         }
-
-        console.log("\nValid count: " + cells.length);
-        console.log("\nIgnore cells:");
-        console.log(ignoreCells);
-        console.log("\nTitle cell:");
-        console.log(titleCell);
-        console.log("\nTitles:");
-        console.log(titles);
-        console.log("\nCells:");
-        console.log(cells);
 
         return result;
     }
@@ -326,13 +317,17 @@ var excel2json = (function() {
      *
      * @param  {string} filePath
      * @param  {string} jsonObj
-     * @param  {object} [options] Set replacer for a JSON replacer. Can also pass in spaces.
+     * @param  {object} [options] Set replacer for a JSON replacer.
      * @param  {Function}   callback
      *
      * @return
      */
     function save(filePath, jsonObj, options, callback) {
-        jsonfile.writeFile(filePath, jsonObj, options, callback);
+        jsonfile.writeFile(filePath, jsonObj, options, function(err) {
+            if (callback) {
+                return callback(err, null);
+            }
+        });
     }
 
     return {
