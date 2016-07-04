@@ -19,6 +19,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:seanmars/excel2json.git"
+    "url": "git+https://github.com/seanmars/excel2json.git"
   }
 }
