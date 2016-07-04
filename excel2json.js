@@ -233,13 +233,12 @@ var excel2json = (function() {
      *
      * @param  {string} filePath
      * @param  {string} sheetName
-     * @param  {string} jsonTemplate
-     * @param  {string} titleChar    = '#'
-     * @param  {string} ignoreChar   = '!'
+     * @param  {string} titleChar = '#'
+     * @param  {string} ignoreChar = '!'
      *
-     * @return {Array} [description]
+     * @return {Object} The JSON Object of data
      */
-    function parse(filePath, sheetName, jsonTemplate,
+    function parse(filePath, sheetName,
         titleChar = '#', ignoreChar = '!') {
         var ws = loadSheet(filePath, sheetName);
         if (!ws) {
