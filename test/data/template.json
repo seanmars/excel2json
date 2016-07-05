@@ -1,0 +1,15 @@
+{
+    "key": "id",
+    "name": "name",
+    "attributes": {
+        "value": "value",
+        "price": "price",
+        "max": "max"
+    },
+    "array": [
+        "value",
+        "price",
+        "max"
+    ],
+    "desc": "desc"
+}
