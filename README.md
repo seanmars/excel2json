@@ -6,9 +6,9 @@ Export the data with JSON format from excel;
 
 - Import excel, Export JSON;
 - Export JSON with prettify or minify;
+- Custom JSON template;
 
 ## How To Use
-
 
 ### Excel
 ---
@@ -24,11 +24,18 @@ Tags:
 ---
 ```javascript
 var e2j = require('./excel2json.js');
-var output = e2j.parse('data.xlsx', 'sheenname');
-console.log(output);
+e2j.load('path/template.json', function(err, jsonObj) {
+    var data = e2j.parse('path/excel.xlsx', 'sheet name', jsonObj);
+    e2j.save('path/to/output/data.json', data);
+});
 ```
 
 ## Todos
 
-- Custom template;
 - CLI;
+
+## Change logs
+
+### 2016/07/06
+---
+- Add feature custom template;
