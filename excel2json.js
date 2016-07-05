@@ -8,6 +8,8 @@ var excel2json = (function() {
         throw new InitException('require is undefined');
     }
 
+    const fs = require('fs');
+    const util = require('util');
     var XLSX = require('xlsx');
     var _ = require('underscore');
     var jsonfile = require('jsonfile');
@@ -229,16 +231,16 @@ var excel2json = (function() {
     /**
      * Parse the excel file and export the data with JSON format.
      *
-     * @method parse
+     * @method parseSheet
      *
      * @param  {string} filePath
      * @param  {string} sheetName
      * @param  {string} titleChar = '#'
      * @param  {string} ignoreChar = '!'
      *
-     * @return {Object} The JSON Object of data
+     * @return {Array}  The raw data of array of objects.
      */
-    function parse(filePath, sheetName,
+    function parseSheet(filePath, sheetName,
         titleChar = '#', ignoreChar = '!') {
         var ws = loadSheet(filePath, sheetName);
         if (!ws) {
@@ -265,10 +267,7 @@ var excel2json = (function() {
         }
 
         var cells = [];
-        var result = {
-            name: sheetName,
-            datas: [],
-        };
+        var rawDatas = [];
         for (var ir = range.s.r; ir <= range.e.r; ++ir) {
             var data = {};
             for (var ic = range.s.c; ic <= range.e.c; ++ic) {
@@ -303,10 +302,122 @@ var excel2json = (function() {
                 continue;
             }
 
-            result.datas.push(data);
+            rawDatas.push(data);
+        }
+
+        return rawDatas;
+    }
+
+    /**
+     * Map the data to tempalte.
+     *
+     * @method map
+     *
+     * @param  {object} data
+     * @param  {JSON}   template
+     *
+     * @return {JSON} Mapped data.
+     */
+    function map(data, template) {
+        var obj = {};
+        for (var key in template) {
+            if (!template.hasOwnProperty(key)) {
+                continue;
+            }
+
+            var val = template[key];
+            switch (val.constructor) {
+                case Array:
+                    obj[key] = [];
+                    for (var index in val) {
+                        if (val.hasOwnProperty(index)) {
+                            obj[key].push(data[val[index]]);
+                        }
+                    }
+                    break;
+
+                case Object:
+                    obj[key] = map(data, val);
+                    break;
+
+                default:
+                    obj[key] = data[val];
+                    break;
+            }
+        }
+
+        return obj;
+    }
+
+    /**
+     * Transform the raw data to the template JSON object.
+     *
+     * @method transform
+     *
+     * @param  {Array}  rawData
+     * @param  {JSON}   template
+     *
+     * @return {Array}  Array of JSON objects with template.
+     */
+    function transform(rawData, template) {
+        // init result object
+        var result = [];
+
+        // foreach data to mapping to template
+        for (var index in rawData) {
+            if (!rawData.hasOwnProperty(index)) {
+                continue;
+            }
+
+            // mapping
+            var obj = map(rawData[index], template);
+            result.push(obj);
         }
 
         return result;
+    }
+
+    /**
+     * Parse the excel file and export the data with JSON format.
+     *
+     * @method parse
+     *
+     * @param  {string} filePath
+     * @param  {string} sheetName
+     * @param  {JSON} template
+     * @param  {string} titleChar = '#'
+     * @param  {string} ignoreChar = '!'
+     *
+     * @return {Object} The JSON Object of data
+     */
+    function parse(filePath, sheetName, template,
+        titleChar = '#', ignoreChar = '!') {
+        // check file is exists or not
+        if (!fs.existsSync(filePath)) {
+            throw new Error(util.format("The file %s is not exists.", filePath));
+        }
+
+        // check sheet name is empty or not
+        if (!sheetName) {
+            throw new Error("The sheet name is null or empty.");
+        }
+
+        // check template
+        if (!_.isObject(template) || _.isArray(template)) {
+            throw new Error("The JSON template is invaild.");
+        }
+        if (_.isEmpty(template)) {
+            throw new Error("The JSON template is null or empty.");
+        }
+
+        var rawDatas = parseSheet(filePath, sheetName, titleChar, ignoreChar);
+        rawDatas = rawDatas || [];
+
+        var datas = transform(rawDatas, template);
+        return {
+            name: sheetName,
+            datas: datas,
+        };
     }
 
     /**
@@ -329,10 +440,28 @@ var excel2json = (function() {
         });
     }
 
+    /**
+     * Load json file.
+     *
+     * @method load
+     *
+     * @param  {string} filePath
+     * @param  {Function}   callback
+     *
+     * @return
+     */
+    function load(filePath, callback) {
+        jsonfile.readFile(filePath, function(err, obj) {
+            if (callback) {
+                return callback(err, obj);
+            }
+        });
+    }
+
     return {
-        toJson: toJson,
-        parse: parse,
         save: save,
+        load: load,
+        parse: parse,
     };
 }());
 
