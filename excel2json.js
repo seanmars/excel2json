@@ -403,17 +403,17 @@ var excel2json = (function() {
         }
 
         // check template
+        template = template || {};
         if (!_.isObject(template) || _.isArray(template)) {
             throw new Error("The JSON template is invaild.");
-        }
-        if (_.isEmpty(template)) {
-            throw new Error("The JSON template is null or empty.");
         }
 
         var rawDatas = parseSheet(filePath, sheetName, titleChar, ignoreChar);
         rawDatas = rawDatas || [];
 
-        var datas = transform(rawDatas, template);
+        var datas = _.isEmpty(template) ?
+            rawDatas :
+            transform(rawDatas, template);
         return {
             name: sheetName,
             datas: datas,
