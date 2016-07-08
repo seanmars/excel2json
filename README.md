@@ -41,6 +41,10 @@ e2j.load('path/template.json', function(err, jsonObj) {
 
 ## <a name="logs"></a>Change logs
 
+### 2016/07/08
+---
+- Update the parse function, now can input empyt or null template, it will direct parse(no any transform) all the title in excel to JSON;
+
 ### 2016/07/06
 ---
 - Add feature custom template;
