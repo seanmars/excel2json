@@ -2,13 +2,18 @@
 
 Export the data with JSON format from excel;
 
-## Features
+- [Features](#features)
+- [How To Use](#howtouse)
+- [Todos](#todos)
+- [Change logs](#logs)
+
+## <a name="features"></a>Features
 
 - Import excel, Export JSON;
 - Export JSON with prettify or minify;
 - Custom JSON template;
 
-## How To Use
+## <a name="howtouse"></a>How To Use
 
 ### Excel
 ---
@@ -30,11 +35,11 @@ e2j.load('path/template.json', function(err, jsonObj) {
 });
 ```
 
-## Todos
+## <a name="todos"></a>Todos
 
 - CLI;
 
-## Change logs
+## <a name="logs"></a>Change logs
 
 ### 2016/07/06
 ---
