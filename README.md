@@ -1,4 +1,4 @@
-# excel2json
+# excel-to-json-template
 
 Export the data with JSON format from excel;
 

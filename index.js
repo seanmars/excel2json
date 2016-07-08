@@ -1,4 +1,4 @@
-var excel2json = (function() {
+var excel2jsontemplate = (function() {
     function InitException(message) {
         this.message = message;
         this.name = 'InitException';
@@ -465,4 +465,4 @@ var excel2json = (function() {
     };
 }());
 
-module.exports = excel2json;
+module.exports = excel2jsontemplate;

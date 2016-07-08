@@ -1,6 +1,6 @@
 const fs = require('fs');
 var path = require('path');
-var e2j = require('../excel2json.js');
+var e2j = require('../index.js');
 
 e2j.load('./test/data/template.json', function(err, jsonObj) {
     const outputPath = './test/output';
