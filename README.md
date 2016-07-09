@@ -27,19 +27,35 @@ Tags:
 
 ### Example
 ---
+
+- Use code:
 ```javascript
-var e2j = require('./excel2json.js');
-e2j.load('path/template.json', function(err, jsonObj) {
-    var data = e2j.parse('path/excel.xlsx', 'sheet name', jsonObj);
-    e2j.save('path/to/output/data.json', data);
+var e2jt = require('./index.js');
+e2jt.loadTemplate('path/template.json', function(err, jsonObj) {
+    var data = e2jt.parse('path/excel.xlsx', 'sheet name', jsonObj);
+    e2jt.save('path/to/output/data.json', data);
 });
+```
+
+- Use cli:
+```
+e2jt /path/of/file
+```
+More about cli:
+```
+e2jt -h
 ```
 
 ## <a name="todos"></a>Todos
 
-- CLI;
+- CLI
+    - Use command to import file(list of file) and parse all of then.
 
 ## <a name="logs"></a>Change logs
+
+### 2016/07/09
+---
+- Add CLI;
 
 ### 2016/07/08
 ---

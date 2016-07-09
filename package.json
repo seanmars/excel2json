@@ -1,23 +1,27 @@
 {
-    "name": "excel-to-json-template",
-    "version": "0.1.1",
-    "description": "Translate excel to json with template.",
-    "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "Sean Mars",
-    "license": "MIT",
-    "dependencies": {
-        "commander": "^2.9.0",
-        "jsonfile": "^2.3.1",
-        "underscore": "^1.8.3",
-        "xlsx": "^0.8.0"
-    },
-    "keywords": [],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/seanmars/excel2json.git"
-    },
-    "homepage": "https://github.com/seanmars/excel2json.git"
+  "name": "excel-to-json-template",
+  "version": "0.2.0",
+  "description": "Translate excel to json with template.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "e2jt": "./bin/e2jt.js"
+  },
+  "author": "Sean Mars",
+  "license": "MIT",
+  "dependencies": {
+    "cli-color": "^1.1.0",
+    "commander": "^2.9.0",
+    "jsonfile": "^2.3.1",
+    "underscore": "^1.8.3",
+    "xlsx": "^0.8.0"
+  },
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seanmars/excel2json.git"
+  },
+  "homepage": "https://github.com/seanmars/excel2json.git"
 }
