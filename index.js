@@ -464,7 +464,7 @@ var excel2jsontemplate = (function() {
      *
      * @return
      */
-    function load(filePath, callback) {
+    function loadTemplate(filePath, callback) {
         jsonfile.readFile(filePath, function(err, obj) {
             if (callback) {
                 return callback(err, obj);
@@ -474,7 +474,7 @@ var excel2jsontemplate = (function() {
 
     return {
         save: save,
-        load: load,
+        loadTemplate: loadTemplate,
         parse: parse,
     };
 }());
