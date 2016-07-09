@@ -8,6 +8,7 @@ var excel2jsontemplate = (function() {
         throw new InitException('require is undefined');
     }
 
+    const path = require('path');
     const fs = require('fs');
     const util = require('util');
     var XLSX = require('xlsx');
@@ -433,10 +434,23 @@ var excel2jsontemplate = (function() {
      * @return
      */
     function save(filePath, jsonObj, options, callback) {
-        jsonfile.writeFile(filePath, jsonObj, options, function(err) {
-            if (callback) {
-                return callback(err, null);
+        if (!callback) {
+            callback = options;
+            options = {};
+        }
+
+        // check the output directory is exists or not, if not create it.
+        var dir = path.dirname(filePath);
+        fs.stat(dir, function(err, data) {
+            if (err) {
+                fs.mkdirSync(dir);
             }
+
+            jsonfile.writeFile(filePath, jsonObj, options, function(err) {
+                if (callback) {
+                    return callback(err);
+                }
+            });
         });
     }
 
