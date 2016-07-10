@@ -48,8 +48,9 @@ e2jt -h
 
 ## <a name="todos"></a>Todos
 
-- CLI
-    - Use command to import file(list of file) and parse all of then.
+- CLI;
+    - Use command to import file(list of file) and parse all of then;
+- Top-level attribute in JSON;
 
 ## <a name="logs"></a>Change logs
 
