@@ -1,3 +1,12 @@
+/**
+ * TODO:
+ * - 引入 mochajs 增加 Unit test
+ * - 改用 Asynchronous 的方式去寫, 能的話引入 async
+ * - 錯誤的地方使用明確的 exception, 而非回傳 null
+ * - 將 titleChar, ignoreChar 更名為 tagTitle, tagIgnore
+ * - 將 tags 改為使用 Objec 傳入 { tagTitle: '!', tagIgnore: '#', tagAttr: '^' }
+ */
+
 var excel2jsontemplate = (function() {
     function InitException(message) {
         this.message = message;
