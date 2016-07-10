@@ -1,10 +1,11 @@
 /**
  * TODO:
  * - 引入 mochajs 增加 Unit test
+ * - 增加 tag: attribute(^), 讓使用者可以在 JSON 的 top-level 增加 attribute
+ * - 增加 CLI 方法, 傳入檔案列表, 依列表依序 parse 各個資料
+ * - 將 tags 改為使用 Objec 傳入 { tagTitle: '!', tagIgnore: '#', tagAttr: '^' }
  * - 改用 Asynchronous 的方式去寫, 能的話引入 async
  * - 錯誤的地方使用明確的 exception, 而非回傳 null
- * - 將 titleChar, ignoreChar 更名為 tagTitle, tagIgnore
- * - 將 tags 改為使用 Objec 傳入 { tagTitle: '!', tagIgnore: '#', tagAttr: '^' }
  */
 
 var excel2jsontemplate = (function() {
@@ -20,9 +21,10 @@ var excel2jsontemplate = (function() {
     const path = require('path');
     const fs = require('fs');
     const util = require('util');
-    var XLSX = require('xlsx');
-    var _ = require('underscore');
-    var jsonfile = require('jsonfile');
+    const XLSX = require('xlsx');
+    const jsonfile = require('jsonfile');
+    const _u = require('underscore');
+    const _l = require('lodash');
 
     /**
      * Load the sheet by file path and sheet name.
@@ -37,6 +39,10 @@ var excel2jsontemplate = (function() {
     function loadSheet(filePath, sheet) {
         var workbook = XLSX.readFile(filePath);
         if (!workbook) {
+            return;
+        }
+
+        if (_l.indexOf(workbook.SheetNames, sheet) === -1) {
             return;
         }
 
@@ -140,11 +146,11 @@ var excel2jsontemplate = (function() {
      *
      * @param  {object} worksheet
      * @param  {object} range
-     * @param  {string} titleChar
+     * @param  {string} tagTitle
      *
      * @return {object} The cell of title.
      */
-    function findTitleTagCell(worksheet, range, titleChar) {
+    function findTitleTagCell(worksheet, range, tagTitle) {
         for (var ir = range.s.r; ir <= range.e.r; ++ir) {
             for (var ic = range.s.c; ic <= range.e.c; ++ic) {
 
@@ -153,7 +159,7 @@ var excel2jsontemplate = (function() {
                     r: ir
                 };
                 z = XLSX.utils.encode_cell(cell_address);
-                if (!isTag(worksheet[z], titleChar)) {
+                if (!isTag(worksheet[z], tagTitle)) {
                     continue;
                 }
 
@@ -162,7 +168,7 @@ var excel2jsontemplate = (function() {
             }
         }
 
-        return null;
+        return;
     }
 
     /**
@@ -172,11 +178,11 @@ var excel2jsontemplate = (function() {
      *
      * @param  {object} worksheet
      * @param  {object} range
-     * @param  {string} ignoreChar
+     * @param  {string} tagIgnore
      *
      * @return {Array}  The array of cell of ignores.
      */
-    function findIgnoreTagCells(worksheet, range, ignoreChar) {
+    function findIgnoreTagCells(worksheet, range, tagIgnore) {
         var cells = [];
         for (var ir = range.s.r; ir <= range.e.r; ++ir) {
             for (var ic = range.s.c; ic <= range.e.c; ++ic) {
@@ -186,7 +192,7 @@ var excel2jsontemplate = (function() {
                     r: ir
                 };
                 z = XLSX.utils.encode_cell(cell_address);
-                if (!isTag(worksheet[z], ignoreChar)) {
+                if (!isTag(worksheet[z], tagIgnore)) {
                     continue;
                 }
 
@@ -245,35 +251,35 @@ var excel2jsontemplate = (function() {
      *
      * @param  {string} filePath
      * @param  {string} sheetName
-     * @param  {string} titleChar = '#'
-     * @param  {string} ignoreChar = '!'
+     * @param  {string} tagTitle = '#'
+     * @param  {string} tagIgnore = '!'
      *
      * @return {Array}  The raw data of array of objects.
      */
     function parseSheet(filePath, sheetName,
-        titleChar = '#', ignoreChar = '!') {
+        tagTitle = '#', tagIgnore = '!') {
         var ws = loadSheet(filePath, sheetName);
         if (!ws) {
-            return null;
+            return;
         }
 
         var ref = ws['!ref'];
         if (!ref) {
-            return null;
+            return;
         }
 
         var range = XLSX.utils.decode_range(ref);
 
         // check the title cell is exists or not
-        var titleCell = findTitleTagCell(ws, range, titleChar);
-        if (titleCell === null) {
-            return null;
+        var titleCell = findTitleTagCell(ws, range, tagTitle);
+        if (!titleCell) {
+            return;
         }
 
-        var ignoreCells = findIgnoreTagCells(ws, range, ignoreChar);
+        var ignoreCells = findIgnoreTagCells(ws, range, tagIgnore);
         var titles = findTitleCells(ws, range, titleCell, ignoreCells);
         if (titles.length === 0) {
-            return null;
+            return;
         }
 
         var cells = [];
@@ -308,7 +314,7 @@ var excel2jsontemplate = (function() {
                 cells.push(cell);
             }
 
-            if (_.isEmpty(data)) {
+            if (_u.isEmpty(data)) {
                 continue;
             }
 
@@ -395,13 +401,13 @@ var excel2jsontemplate = (function() {
      * @param  {string} filePath
      * @param  {string} sheetName
      * @param  {JSON} template
-     * @param  {string} titleChar = '#'
-     * @param  {string} ignoreChar = '!'
+     * @param  {string} tagTitle = '#'
+     * @param  {string} tagIgnore = '!'
      *
      * @return {Object} The JSON Object of data
      */
     function parse(filePath, sheetName, template,
-        titleChar = '#', ignoreChar = '!') {
+        tagTitle = '#', tagIgnore = '!') {
         // check file is exists or not
         if (!fs.existsSync(filePath)) {
             throw new Error(util.format("The file %s is not exists.", filePath));
@@ -414,16 +420,19 @@ var excel2jsontemplate = (function() {
 
         // check template
         template = template || {};
-        if (!_.isObject(template) || _.isArray(template)) {
+        if (!_u.isObject(template) || _u.isArray(template)) {
             throw new Error("The JSON template is invaild.");
         }
 
-        var rawDatas = parseSheet(filePath, sheetName, titleChar, ignoreChar);
-        rawDatas = rawDatas || [];
+        // get raw data
+        var rawDatas = parseSheet(filePath, sheetName,
+            tagTitle, tagIgnore) || [];
 
-        var datas = _.isEmpty(template) ?
+        // transform the data if necessary
+        var datas = _u.isEmpty(template) ?
             rawDatas :
             transform(rawDatas, template);
+
         return {
             name: sheetName,
             datas: datas,

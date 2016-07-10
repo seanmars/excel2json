@@ -56,6 +56,10 @@ e2jt -h
 
 ### 2016/07/09
 ---
+- Refactoring some code;(rename, add some check...)
+
+### 2016/07/09
+---
 - Add CLI;
 
 ### 2016/07/08
