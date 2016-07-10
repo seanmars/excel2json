@@ -4,7 +4,7 @@
   "description": "Translate excel to json with template.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha ./test/mt.js"
   },
   "bin": {
     "e2jt": "./bin/e2jt.js"
@@ -24,5 +24,9 @@
     "type": "git",
     "url": "https://github.com/seanmars/excel2json.git"
   },
-  "homepage": "https://github.com/seanmars/excel2json.git"
+  "homepage": "https://github.com/seanmars/excel2json.git",
+  "devDependencies": {
+    "mocha": "^2.5.3",
+    "should": "^9.0.2"
+  }
 }

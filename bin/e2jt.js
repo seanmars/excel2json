@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-const path = require('path');
-const fs = require('fs');
-const util = require('util');
-const cmder = require('commander');
-const clc = require('cli-color');
-const pkg = require('../package.json');
-const e2jt = require('../index.js');
+var path = require('path');
+var fs = require('fs');
+var util = require('util');
+var cmder = require('commander');
+var clc = require('cli-color');
+var pkg = require('../package.json');
+var e2jt = require('../index.js');
 
 var inputFile;
 var inputSheet;

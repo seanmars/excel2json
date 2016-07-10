@@ -1,9 +1,9 @@
-const fs = require('fs');
+var fs = require('fs');
 var path = require('path');
 var e2jt = require('../index.js');
 
 e2jt.loadTemplate('./test/data/template.json', function(err, jsonObj) {
-    const outputPath = './test/output';
+    var outputPath = './test/output';
     var stats = fs.statSync(outputPath);
     if (!stats.isDirectory()) {
         fs.mkdirSync('./test/output/');
@@ -18,7 +18,7 @@ e2jt.loadTemplate('./test/data/template.json', function(err, jsonObj) {
 });
 
 e2jt.loadTemplate('./test/data/template.json', function(err, jsonObj) {
-    const outputPath = './test/output';
+    var outputPath = './test/output';
     var stats = fs.statSync(outputPath);
     if (!stats.isDirectory()) {
         fs.mkdirSync('./test/output/');
@@ -33,7 +33,7 @@ e2jt.loadTemplate('./test/data/template.json', function(err, jsonObj) {
 });
 
 e2jt.loadTemplate('./test/data/template.json', function(err, jsonObj) {
-    const outputPath = './test/output';
+    var outputPath = './test/output';
     var stats = fs.statSync(outputPath);
     if (!stats.isDirectory()) {
         fs.mkdirSync('./test/output/');

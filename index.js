@@ -18,13 +18,13 @@ var excel2jsontemplate = (function() {
         throw new InitException('require is undefined');
     }
 
-    const path = require('path');
-    const fs = require('fs');
-    const util = require('util');
-    const XLSX = require('xlsx');
-    const jsonfile = require('jsonfile');
-    const _u = require('underscore');
-    const _l = require('lodash');
+    var path = require('path');
+    var fs = require('fs');
+    var util = require('util');
+    var XLSX = require('xlsx');
+    var jsonfile = require('jsonfile');
+    var _u = require('underscore');
+    var _l = require('lodash');
 
     /**
      * Load the sheet by file path and sheet name.
@@ -32,36 +32,28 @@ var excel2jsontemplate = (function() {
      * @method loadSheet
      *
      * @param  {string}  filePath
-     * @param  {string}  sheet
+     * @param  {string}  sheetName
      *
      * @return Object
      */
-    function loadSheet(filePath, sheet) {
-        var workbook = XLSX.readFile(filePath);
-        if (!workbook) {
+    function loadSheet(filePath, sheetName) {
+        if (_u.isEmpty(filePath) || _u.isEmpty(sheetName)) {
             return;
         }
 
-        if (_l.indexOf(workbook.SheetNames, sheet) === -1) {
+        try {
+            var workbook = XLSX.readFile(filePath);
+            if (!workbook) {
+                return;
+            }
+            if (_l.indexOf(workbook.SheetNames, sheetName) === -1) {
+                return;
+            }
+
+            return workbook.Sheets[sheetName];
+        } catch (e) {
             return;
         }
-
-        return workbook.Sheets[sheet];
-    }
-
-    /**
-     * Load the sheet in excel and output the data with JSON format.
-     *
-     * @method toJson
-     *
-     * @param  {string} filePath
-     * @param  {string} sheet
-     *
-     * @return {JSON}
-     */
-    function toJson(filePath, sheet) {
-        var ws = loadSheet(filePath, sheet);
-        return XLSX.utils.sheet_to_json(ws);
     }
 
     /**
@@ -69,18 +61,17 @@ var excel2jsontemplate = (function() {
      *
      * @method factoryCell
      *
-     * @param  {number} col
-     * @param  {number} row
-     * @param  {string} zVal
-     * @param  {string} rawVal
+     * @param  {Object} cell_address [{ c: column, r: row }]
+     * @param  {string} z_value [number format string associated with the cell]
+     * @param  {Object} rawCell [Raw cell object]
      *
      * @return {Object} The cell Object
      */
-    function factoryCell(cell_address, z_value, obj) {
+    function factoryCell(cell_address, z_value, rawCell) {
         var cell = {
-            o: obj,
-            v: obj ? obj.v : null, // raw value
-            w: obj ? obj.w : null, // formatted text (if applicable)
+            o: rawCell,
+            v: rawCell ? rawCell.v : null, // raw value
+            w: rawCell ? rawCell.w : null, // formatted text (if applicable)
             c: cell_address.c,
             r: cell_address.r,
             z: z_value,
@@ -100,7 +91,7 @@ var excel2jsontemplate = (function() {
      * @method isNeedIgnore
      *
      * @param  {Object} cell
-     * @param  {Array}  ignores
+     * @param  {Array}  ignore cells
      *
      * @return {Boolean}
      */
@@ -123,6 +114,16 @@ var excel2jsontemplate = (function() {
         return false;
     }
 
+    /**
+     * Check is tag or not.
+     *
+     * @method isTag
+     *
+     * @param  {Object} cell
+     * @param  {string} tagChar
+     *
+     * @return {Boolean}
+     */
     function isTag(cell, tagChar) {
         if (!cell || !cell.v) {
             return false;
@@ -144,11 +145,11 @@ var excel2jsontemplate = (function() {
      *
      * @method findTitleTagCell
      *
-     * @param  {object} worksheet
-     * @param  {object} range
+     * @param  {Object} worksheet
+     * @param  {Object} range
      * @param  {string} tagTitle
      *
-     * @return {object} The cell of title.
+     * @return {Object} The cell of title.
      */
     function findTitleTagCell(worksheet, range, tagTitle) {
         for (var ir = range.s.r; ir <= range.e.r; ++ir) {
@@ -176,8 +177,8 @@ var excel2jsontemplate = (function() {
      *
      * @method findIgnoreTagCells
      *
-     * @param  {object} worksheet
-     * @param  {object} range
+     * @param  {Object} worksheet
+     * @param  {Object} range
      * @param  {string} tagIgnore
      *
      * @return {Array}  The array of cell of ignores.
@@ -209,10 +210,10 @@ var excel2jsontemplate = (function() {
      *
      * @method findTitleCells
      *
-     * @param  {object} worksheet
-     * @param  {object} range
-     * @param  {object} titleCell
-     * @param  {object} ignoreCells
+     * @param  {Object} worksheet
+     * @param  {Object} range
+     * @param  {Object} titleCell
+     * @param  {Object} ignoreCells
      *
      * @return {Array}  The cells of title
      */
@@ -329,7 +330,7 @@ var excel2jsontemplate = (function() {
      *
      * @method map
      *
-     * @param  {object} data
+     * @param  {Object} data
      * @param  {JSON}   template
      *
      * @return {JSON} Mapped data.
@@ -446,7 +447,7 @@ var excel2jsontemplate = (function() {
      *
      * @param  {string} filePath
      * @param  {string} jsonObj
-     * @param  {object} [options] Set replacer for a JSON replacer.
+     * @param  {Object} [options] Set replacer for a JSON replacer.
      * @param  {Function}   callback
      *
      * @return
@@ -494,6 +495,17 @@ var excel2jsontemplate = (function() {
         save: save,
         loadTemplate: loadTemplate,
         parse: parse,
+
+        loadSheet: loadSheet,
+        factoryCell: factoryCell,
+        isNeedIgnore: isNeedIgnore,
+        isTag: isTag,
+        findTitleTagCell: findTitleTagCell,
+        findIgnoreTagCells: findIgnoreTagCells,
+        findTitleCells: findTitleCells,
+        parseSheet: parseSheet,
+        map: map,
+        transform: transform,
     };
 }());
 
