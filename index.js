@@ -6,6 +6,10 @@
  * - 將 tags 改為使用 Objec 傳入 { tagTitle: '!', tagIgnore: '#', tagAttr: '^' }
  * - 改用 Asynchronous 的方式去寫, 能的話引入 async
  * - 錯誤的地方使用明確的 exception, 而非回傳 null
+ *
+ * Refactoring:
+ * 	- 修改 function A(x,y) call function B(y), 但卻在 A, B 裡都詳細檢查判斷了 y;
+ * 	修正成為只需要在 function B(y) 內檢查就好, A 只需要判斷回傳出來的值
  */
 
 var excel2jsontemplate = (function() {
