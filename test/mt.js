@@ -1,15 +1,17 @@
 var should = require('should');
+var chai = require('chai');
+var util = require('util');
 var e2jt = require('../index.js');
 
 // load file
 describe('Load file', function() {
     // #loadSheet()
     describe('#loadSheet()', function() {
-        describe('when type if xlsx', function() {
+        describe('when type is xlsx', function() {
             describe('when file is NOT exist', function() {
-                it('should return undefined', function() {
-                    var sheet = e2jt.loadSheet('./test/data/none.xlsx', 'test');
-                    should(sheet).be.not.ok();
+                it('should throw expect', function() {
+                    var filePath = './test/data/none.xlsx';
+                    chai.expect(() => e2jt.loadSheet(filePath, 'test')).to.throw(Error);
                 });
             });
 

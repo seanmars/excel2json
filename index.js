@@ -46,6 +46,11 @@ var excel2jsontemplate = (function() {
         }
 
         try {
+            // check file is exists or not
+            if (!fs.existsSync(filePath)) {
+                throw new Error('The file is not exists.');
+            }
+
             var workbook = XLSX.readFile(filePath);
             if (!workbook) {
                 return;
@@ -56,7 +61,7 @@ var excel2jsontemplate = (function() {
 
             return workbook.Sheets[sheetName];
         } catch (e) {
-            return;
+            throw e;
         }
     }
 
@@ -413,11 +418,6 @@ var excel2jsontemplate = (function() {
      */
     function parse(filePath, sheetName, template,
         tagTitle = '#', tagIgnore = '!') {
-        // check file is exists or not
-        if (!fs.existsSync(filePath)) {
-            throw new Error(util.format("The file %s is not exists.", filePath));
-        }
-
         // check sheet name is empty or not
         if (!sheetName) {
             throw new Error("The sheet name is null or empty.");
