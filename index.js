@@ -2,11 +2,14 @@
  * TODO:
  * - 引入 mochajs 增加 Unit test
  * - 增加 tag: attribute(^), 讓使用者可以在 JSON 的 top-level 增加 attribute
+ * 	- tag attribute 的位子一定要在 tag title 上方
+ * 	- tag attribute 由同 row 的三個連續的 column 組成, 順序為 tag > property name > value
  * - 增加 CLI 方法, 傳入檔案列表, 依列表依序 parse 各個資料
  * - 將 tags 改為使用 Objec 傳入 { tagTitle: '!', tagIgnore: '#', tagAttr: '^' }
  * - 改用 Asynchronous 的方式去寫, 能的話引入 async
  * - 錯誤的地方使用明確的 exception, 而非回傳 null
- *
+ * - 修改取得資料的迴圈只需要跑 tag title 以下的 row
+ * - Check the value of title cell is valid or not (only alphabet)
  * Refactoring:
  * 	- 修改 function A(x,y) call function B(y), 但卻在 A, B 裡都詳細檢查判斷了 y;
  * 	修正成為只需要在 function B(y) 內檢查就好, A 只需要判斷回傳出來的值
@@ -161,6 +164,10 @@ var excel2jsontemplate = (function() {
      * @return {Object} The cell of title.
      */
     function findTitleTagCell(worksheet, range, tagTitle) {
+        if (!tagTitle) {
+            return;
+        }
+
         for (var ir = range.s.r; ir <= range.e.r; ++ir) {
             for (var ic = range.s.c; ic <= range.e.c; ++ic) {
 
@@ -182,19 +189,24 @@ var excel2jsontemplate = (function() {
     }
 
     /**
-     * Find the cells of ignore by ignore char.
+     * Find the cells by tag char.
      *
-     * @method findIgnoreTagCells
+     * @method findTagCells
      *
-     * @param  {Object} worksheet
-     * @param  {Object} range
-     * @param  {string} tagIgnore
+     * @param   {Object} worksheet
+     * @param   {Object} range
+     * @param   {Object} endCell
+     * @param   {string} tagChar
      *
-     * @return {Array}  The array of cell of ignores.
+     * @return  {Array} The array of cell(s).
      */
-    function findIgnoreTagCells(worksheet, range, tagIgnore) {
+    function findTagCells(worksheet, range, endCell, tagChar) {
         var cells = [];
-        for (var ir = range.s.r; ir <= range.e.r; ++ir) {
+        if (!tagChar) {
+            return cells;
+        }
+
+        for (var ir = range.s.r; ir <= endCell.r; ++ir) {
             for (var ic = range.s.c; ic <= range.e.c; ++ic) {
 
                 var cell_address = {
@@ -202,7 +214,7 @@ var excel2jsontemplate = (function() {
                     r: ir
                 };
                 z = XLSX.utils.encode_cell(cell_address);
-                if (!isTag(worksheet[z], tagIgnore)) {
+                if (!isTag(worksheet[z], tagChar)) {
                     continue;
                 }
 
@@ -241,6 +253,8 @@ var excel2jsontemplate = (function() {
 
             var cell = factoryCell(cell_address, z, worksheet[z]);
 
+            // TODO: check the value is valid or not (only alphabet)
+
             // check the cell is need to ignore or not
             if (isNeedIgnore(cell, ignoreCells)) {
                 continue;
@@ -261,13 +275,13 @@ var excel2jsontemplate = (function() {
      *
      * @param  {string} filePath
      * @param  {string} sheetName
-     * @param  {string} tagTitle = '#'
-     * @param  {string} tagIgnore = '!'
+     * @param  {string} tagTitle
+     * @param  {string} tagAttribute
+     * @param  {string} tagIgnore
      *
      * @return {Array}  The raw data of array of objects.
      */
-    function parseSheet(filePath, sheetName,
-        tagTitle = '#', tagIgnore = '!') {
+    function parseSheet(filePath, sheetName, tagTitle, tagAttribute, tagIgnore) {
         var ws = loadSheet(filePath, sheetName);
         if (!ws) {
             return;
@@ -286,15 +300,22 @@ var excel2jsontemplate = (function() {
             return;
         }
 
-        var ignoreCells = findIgnoreTagCells(ws, range, tagIgnore);
+        // find all attribute cells
+        var attrCells = findTagCells(ws, range, titleCell, tagAttribute);
+        console.log(attrCells);
+        // find all ignore cells
+        var ignoreCells = findTagCells(ws, range, titleCell, tagIgnore);
+        // find all titles with titleCell
         var titles = findTitleCells(ws, range, titleCell, ignoreCells);
         if (titles.length === 0) {
             return;
         }
 
+        // TODO: fetch all attribute cell(s)
+
         var cells = [];
         var rawDatas = [];
-        for (var ir = range.s.r; ir <= range.e.r; ++ir) {
+        for (var ir = titleCell.r + 1; ir <= range.e.r; ++ir) {
             var data = {};
             for (var ic = range.s.c; ic <= range.e.c; ++ic) {
                 var cell_address = {
@@ -314,6 +335,7 @@ var excel2jsontemplate = (function() {
                     continue;
                 }
 
+                // check title cell content
                 var t = titles[ic];
                 if (!t || !t.w) {
                     continue;
@@ -408,16 +430,20 @@ var excel2jsontemplate = (function() {
      *
      * @method parse
      *
-     * @param  {string} filePath
-     * @param  {string} sheetName
-     * @param  {JSON} template
-     * @param  {string} tagTitle = '#'
-     * @param  {string} tagIgnore = '!'
+     * @param   {string} filePath
+     * @param   {string} sheetName
+     * @param   {JSON} template
+     * @param   {string} tagTitle = '#'
+     * @param   {string} tagAttribute = '^'
+     * @param   {string} tagIgnore = '!'
      *
-     * @return {Object} The JSON Object of data
+     * @return  {Object} The JSON Object of data
      */
-    function parse(filePath, sheetName, template,
-        tagTitle = '#', tagIgnore = '!') {
+    function parse(filePath, sheetName, template, tagTitle, tagAttribute, tagIgnore) {
+        tagTitle = tagTitle || '#';
+        tagAttribute = tagAttribute || '^';
+        tagIgnore = tagIgnore || '!';
+
         // check sheet name is empty or not
         if (!sheetName) {
             throw new Error("The sheet name is null or empty.");
@@ -431,7 +457,7 @@ var excel2jsontemplate = (function() {
 
         // get raw data
         var rawDatas = parseSheet(filePath, sheetName,
-            tagTitle, tagIgnore) || [];
+            tagTitle, tagAttribute, tagIgnore) || [];
 
         // transform the data if necessary
         var datas = _u.isEmpty(template) ?
@@ -505,7 +531,7 @@ var excel2jsontemplate = (function() {
         isNeedIgnore: isNeedIgnore,
         isTag: isTag,
         findTitleTagCell: findTitleTagCell,
-        findIgnoreTagCells: findIgnoreTagCells,
+        findTagCells: findTagCells,
         findTitleCells: findTitleCells,
         parseSheet: parseSheet,
         map: map,
