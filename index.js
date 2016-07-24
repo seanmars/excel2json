@@ -269,6 +269,36 @@ var excel2jsontemplate = (function() {
     }
 
     /**
+     * fetch all the attribute(s)
+     *
+     * @method fetchAttrJson
+     *
+     * @param   {Object} ws
+     * @param   {Array} attrCells
+     *
+     * @return  {JSON} The JSON Object of attribute
+     */
+    function fetchAttrJson(ws, attrCells) {
+        var cells = [];
+        for (var cell of attrCells) {
+            var keyAddr = {
+                c: cell.c + 1,
+                r: cell.r
+            }, valAddr = {
+                c: cell.c + 2,
+                r: cell.r
+            };
+
+            var zKey = XLSX.utils.encode_cell(keyAddr),
+                zVal = XLSX.utils.encode_cell(valAddr);
+
+            cells[ws[zKey].v] = ws[zVal].v;
+        }
+
+        return cells;
+    }
+
+    /**
      * Parse the excel file and export the data with JSON format.
      *
      * @method parseSheet
@@ -294,25 +324,26 @@ var excel2jsontemplate = (function() {
 
         var range = XLSX.utils.decode_range(ref);
 
-        // check the title cell is exists or not
+        // find all tag of title cells
         var titleCell = findTitleTagCell(ws, range, tagTitle);
         if (!titleCell) {
             return;
         }
-
-        // find all attribute cells
+        // find all tag of attribute cells
         var attrCells = findTagCells(ws, range, titleCell, tagAttribute);
-        console.log(attrCells);
-        // find all ignore cells
+        // find all tag of ignore cells
         var ignoreCells = findTagCells(ws, range, titleCell, tagIgnore);
+
         // find all titles with titleCell
         var titles = findTitleCells(ws, range, titleCell, ignoreCells);
         if (titles.length === 0) {
             return;
         }
 
-        // TODO: fetch all attribute cell(s)
+        // fetch all attribute cell(s)
+        var attrs = fetchAttrJson(ws, attrCells);
 
+        // fetch all raw datas
         var cells = [];
         var rawDatas = [];
         for (var ir = titleCell.r + 1; ir <= range.e.r; ++ir) {
@@ -352,6 +383,8 @@ var excel2jsontemplate = (function() {
 
             rawDatas.push(data);
         }
+
+        // TODO: generator the JSON add the all attribute to top-level attribute and add rawdata to datas
 
         return rawDatas;
     }
