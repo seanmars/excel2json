@@ -4,42 +4,42 @@ var util = require('util');
 var e2jt = require('../index.js');
 
 // load file
-describe('Load file', function() {
+describe('Load file', function () {
     // #loadSheet()
-    describe('#loadSheet()', function() {
-        describe('when type is xlsx', function() {
-            describe('when file is NOT exist', function() {
-                it('should throw expect', function() {
+    describe('#loadSheet()', function () {
+        describe('when type is xlsx', function () {
+            describe('when file is NOT exist', function () {
+                it('should throw expect', function () {
                     var filePath = './test/data/none.xlsx';
-                    chai.expect(() => e2jt.loadSheet(filePath, 'test')).to.throw(Error);
+                    should.throws(() => e2jt.loadSheet(filePath, 'test'));
                 });
             });
 
-            describe('when sheet is exist', function() {
-                it('should return undefined', function() {
+            describe('when sheet is exist', function () {
+                it('should return undefined', function () {
                     var sheet = e2jt.loadSheet('./test/data/test.xlsx', 'none');
-                    should(sheet).be.not.ok();
+                    should(sheet).not.ok();
                 });
             });
 
-            describe('when sheet is NOT exist', function() {
-                it('should return sheet object', function() {
+            describe('when sheet is NOT exist', function () {
+                it('should return sheet object', function () {
                     var sheet = e2jt.loadSheet('./test/data/test.xlsx', 'test');
-                    should(sheet).be.ok();
+                    should(sheet).ok();
                 });
             });
 
-            describe('without parameter [filePath] and [sheetName]', function() {
-                it('should return undefined', function() {
+            describe('without parameter [filePath] and [sheetName]', function () {
+                it('should return undefined', function () {
                     var sheet = e2jt.loadSheet();
-                    should(sheet).be.not.ok();
+                    should(sheet).not.ok();
                 });
             });
 
-            describe('without parameter [sheetName]', function() {
-                it('should return undefined', function() {
+            describe('without parameter [sheetName]', function () {
+                it('should return undefined', function () {
                     var sheet = e2jt.loadSheet('./test/data/test.xlsx');
-                    should(sheet).be.not.ok();
+                    should(sheet).not.ok();
                 });
             });
         });

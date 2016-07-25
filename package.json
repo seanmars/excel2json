@@ -4,7 +4,7 @@
   "description": "Translate excel to json with template.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha ./test/test.js"
+    "test": "./node_modules/.bin/mocha --reporter spec"
   },
   "bin": {
     "e2jt": "./bin/e2jt.js"
