@@ -15,7 +15,7 @@
  * 	修正成為只需要在 function B(y) 內檢查就好, A 只需要判斷回傳出來的值
  */
 
-var excel2jsontemplate = (function() {
+var excel2jsontemplate = (function () {
     function InitException(message) {
         this.message = message;
         this.name = 'InitException';
@@ -282,12 +282,13 @@ var excel2jsontemplate = (function() {
         var cells = [];
         for (var cell of attrCells) {
             var keyAddr = {
-                c: cell.c + 1,
-                r: cell.r
-            }, valAddr = {
-                c: cell.c + 2,
-                r: cell.r
-            };
+                    c: cell.c + 1,
+                    r: cell.r
+                },
+                valAddr = {
+                    c: cell.c + 2,
+                    r: cell.r
+                };
 
             var zKey = XLSX.utils.encode_cell(keyAddr),
                 zVal = XLSX.utils.encode_cell(valAddr);
@@ -408,22 +409,22 @@ var excel2jsontemplate = (function() {
 
             var val = template[key];
             switch (val.constructor) {
-                case Array:
-                    obj[key] = [];
-                    for (var index in val) {
-                        if (val.hasOwnProperty(index)) {
-                            obj[key].push(data[val[index]]);
-                        }
+            case Array:
+                obj[key] = [];
+                for (var index in val) {
+                    if (val.hasOwnProperty(index)) {
+                        obj[key].push(data[val[index]]);
                     }
-                    break;
+                }
+                break;
 
-                case Object:
-                    obj[key] = map(data, val);
-                    break;
+            case Object:
+                obj[key] = map(data, val);
+                break;
 
-                default:
-                    obj[key] = data[val];
-                    break;
+            default:
+                obj[key] = data[val];
+                break;
             }
         }
 
@@ -523,12 +524,12 @@ var excel2jsontemplate = (function() {
 
         // check the output directory is exists or not, if not create it.
         var dir = path.dirname(filePath);
-        fs.stat(dir, function(err, data) {
+        fs.stat(dir, function (err, data) {
             if (err) {
                 fs.mkdirSync(dir);
             }
 
-            jsonfile.writeFile(filePath, jsonObj, options, function(err) {
+            jsonfile.writeFile(filePath, jsonObj, options, function (err) {
                 if (callback) {
                     return callback(err);
                 }
@@ -547,7 +548,7 @@ var excel2jsontemplate = (function() {
      * @return
      */
     function loadTemplate(filePath, callback) {
-        jsonfile.readFile(filePath, function(err, obj) {
+        jsonfile.readFile(filePath, function (err, obj) {
             if (callback) {
                 return callback(err, obj);
             }
