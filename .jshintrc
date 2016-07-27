@@ -1,3 +1,6 @@
 {
-    "esversion": 6
+    "esversion": 6,
+
+    // W069
+    "sub": true
 }
