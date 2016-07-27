@@ -1,21 +1,16 @@
 /**
  * TODO:
- * - 引入 mochajs 增加 Unit test
- * - 增加 tag: attribute(^), 讓使用者可以在 JSON 的 top-level 增加 attribute
- * 	- tag attribute 的位子一定要在 tag title 上方
- * 	- tag attribute 由同 row 的三個連續的 column 組成, 順序為 tag > property name > value
+ * - Check the value of title cell is valid or not (only alphabet)
  * - 增加 CLI 方法, 傳入檔案列表, 依列表依序 parse 各個資料
  * - 將 tags 改為使用 Objec 傳入 { tagTitle: '!', tagIgnore: '#', tagAttr: '^' }
  * - 改用 Asynchronous 的方式去寫, 能的話引入 async
  * - 錯誤的地方使用明確的 exception, 而非回傳 null
- * - 修改取得資料的迴圈只需要跑 tag title 以下的 row
- * - Check the value of title cell is valid or not (only alphabet)
  * Refactoring:
  * 	- 修改 function A(x,y) call function B(y), 但卻在 A, B 裡都詳細檢查判斷了 y;
  * 	修正成為只需要在 function B(y) 內檢查就好, A 只需要判斷回傳出來的值
  */
 
-var excel2jsontemplate = (function () {
+var excel2jsontemplate = (function() {
     function InitException(message) {
         this.message = message;
         this.name = 'InitException';
@@ -279,7 +274,7 @@ var excel2jsontemplate = (function () {
      * @return  {JSON} The JSON Object of attribute
      */
     function fetchAttrJson(ws, attrCells) {
-        var cells = [];
+        var cells = {};
         for (var cell of attrCells) {
             var keyAddr = {
                     c: cell.c + 1,
@@ -300,51 +295,19 @@ var excel2jsontemplate = (function () {
     }
 
     /**
-     * Parse the excel file and export the data with JSON format.
+     * fetch raw data(s)
      *
-     * @method parseSheet
+     * @method fetchRawData
      *
-     * @param  {string} filePath
-     * @param  {string} sheetName
-     * @param  {string} tagTitle
-     * @param  {string} tagAttribute
-     * @param  {string} tagIgnore
+     * @param {Object} ws  Object of worksheet
+     * @param {Object} range The range from XLSX.utils.decode_range
+     * @param {Object} titleCell
+     * @param {Array} titles
+     * @param {Array} ignoreCells
      *
-     * @return {Array}  The raw data of array of objects.
+     * @return {Array} Array of Cells
      */
-    function parseSheet(filePath, sheetName, tagTitle, tagAttribute, tagIgnore) {
-        var ws = loadSheet(filePath, sheetName);
-        if (!ws) {
-            return;
-        }
-
-        var ref = ws['!ref'];
-        if (!ref) {
-            return;
-        }
-
-        var range = XLSX.utils.decode_range(ref);
-
-        // find all tag of title cells
-        var titleCell = findTitleTagCell(ws, range, tagTitle);
-        if (!titleCell) {
-            return;
-        }
-        // find all tag of attribute cells
-        var attrCells = findTagCells(ws, range, titleCell, tagAttribute);
-        // find all tag of ignore cells
-        var ignoreCells = findTagCells(ws, range, titleCell, tagIgnore);
-
-        // find all titles with titleCell
-        var titles = findTitleCells(ws, range, titleCell, ignoreCells);
-        if (titles.length === 0) {
-            return;
-        }
-
-        // fetch all attribute cell(s)
-        var attrs = fetchAttrJson(ws, attrCells);
-
-        // fetch all raw datas
+    function fetchRawData(ws, range, titleCell, titles, ignoreCells) {
         var cells = [];
         var rawDatas = [];
         for (var ir = titleCell.r + 1; ir <= range.e.r; ++ir) {
@@ -385,9 +348,61 @@ var excel2jsontemplate = (function () {
             rawDatas.push(data);
         }
 
-        // TODO: generator the JSON add the all attribute to top-level attribute and add rawdata to datas
-
         return rawDatas;
+    }
+
+    /**
+     * Parse the excel file and export the data with JSON format.
+     *
+     * @method parseSheet
+     *
+     * @param {string} filePath
+     * @param {string} sheetName
+     * @param {string} tagTitle
+     * @param {string} tagAttribute
+     * @param {string} tagIgnore
+     *
+     * @return {JSON} The data of JSON
+     */
+    function parseSheet(filePath, sheetName, tagTitle, tagAttribute, tagIgnore) {
+        var ws = loadSheet(filePath, sheetName);
+        if (!ws) {
+            return;
+        }
+
+        var ref = ws['!ref'];
+        if (!ref) {
+            return;
+        }
+
+        var range = XLSX.utils.decode_range(ref);
+
+        // find all tag of title cells
+        var titleCell = findTitleTagCell(ws, range, tagTitle);
+        if (!titleCell) {
+            return;
+        }
+        // find all tag of attribute cells
+        var attrCells = findTagCells(ws, range, titleCell, tagAttribute);
+        // find all tag of ignore cells
+        var ignoreCells = findTagCells(ws, range, titleCell, tagIgnore);
+
+        // find all titles with titleCell
+        var titles = findTitleCells(ws, range, titleCell, ignoreCells);
+        if (titles.length === 0) {
+            return;
+        }
+
+        // fetch all attribute cell(s)
+        var attrs = fetchAttrJson(ws, attrCells);
+
+        // fetch all raw datas
+        var rawDatas = fetchRawData(ws, range, titleCell, titles, ignoreCells);
+
+        return {
+            attrs: attrs,
+            rawDatas: rawDatas
+        };
     }
 
     /**
@@ -409,22 +424,22 @@ var excel2jsontemplate = (function () {
 
             var val = template[key];
             switch (val.constructor) {
-            case Array:
-                obj[key] = [];
-                for (var index in val) {
-                    if (val.hasOwnProperty(index)) {
-                        obj[key].push(data[val[index]]);
+                case Array:
+                    obj[key] = [];
+                    for (var index in val) {
+                        if (val.hasOwnProperty(index)) {
+                            obj[key].push(data[val[index]]);
+                        }
                     }
-                }
-                break;
+                    break;
 
-            case Object:
-                obj[key] = map(data, val);
-                break;
+                case Object:
+                    obj[key] = map(data, val);
+                    break;
 
-            default:
-                obj[key] = data[val];
-                break;
+                default:
+                    obj[key] = data[val];
+                    break;
             }
         }
 
@@ -489,19 +504,25 @@ var excel2jsontemplate = (function () {
             throw new Error("The JSON template is invaild.");
         }
 
-        // get raw data
-        var rawDatas = parseSheet(filePath, sheetName,
-            tagTitle, tagAttribute, tagIgnore) || [];
-
-        // transform the data if necessary
-        var datas = _u.isEmpty(template) ?
-            rawDatas :
-            transform(rawDatas, template);
-
-        return {
-            name: sheetName,
-            datas: datas,
+        // get data
+        var objJson = parseSheet(filePath, sheetName, tagTitle, tagAttribute, tagIgnore);
+        objJson = objJson || {
+            attrs: {},
+            rawDatas: []
         };
+
+        // copy top-level attribute
+        var result = objJson.attrs;
+        // transform the name attribute
+        if (!_u.isEmpty(objJson.attrs) && result.hasOwnProperty('name')) {
+            result.name = result.name;
+        } else {
+            result['name'] = sheetName;
+        }
+        // transform the data if necessary
+        result.datas = _u.isEmpty(template) ? objJson.rawDatas : transform(objJson.rawDatas, template);
+
+        return result;
     }
 
     /**
@@ -524,12 +545,12 @@ var excel2jsontemplate = (function () {
 
         // check the output directory is exists or not, if not create it.
         var dir = path.dirname(filePath);
-        fs.stat(dir, function (err, data) {
+        fs.stat(dir, function(err, data) {
             if (err) {
                 fs.mkdirSync(dir);
             }
 
-            jsonfile.writeFile(filePath, jsonObj, options, function (err) {
+            jsonfile.writeFile(filePath, jsonObj, options, function(err) {
                 if (callback) {
                     return callback(err);
                 }
@@ -548,7 +569,7 @@ var excel2jsontemplate = (function () {
      * @return
      */
     function loadTemplate(filePath, callback) {
-        jsonfile.readFile(filePath, function (err, obj) {
+        jsonfile.readFile(filePath, function(err, obj) {
             if (callback) {
                 return callback(err, obj);
             }

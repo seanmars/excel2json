@@ -50,9 +50,24 @@ e2jt -h
 
 - CLI;
     - Use command to import file(list of file) and parse all of then;
-- Top-level attribute in JSON;
 
 ## <a name="logs"></a>Change logs
+
+### 2016/07/28
+---
+FEATURE
+
+- 增加 tag: attribute(^), 讓使用者可以在 JSON 的 top-level 增加 attribute;
+    - tag attribute 的位子一定要在 tag title 上方
+    - tag attribute 由同 row 的三個連續的 column 組成, 順序為 tag > property name > value
+
+IMPROVE
+
+- 修改取得資料的迴圈只需要跑 tag title 以下的 row
+
+OTHER
+
+- 引入 mochajs 增加 Unit test;
 
 ### 2016/07/09
 ---
