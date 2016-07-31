@@ -1,0 +1,3 @@
+--timeout 500000
+--require should
+--ui bdd
