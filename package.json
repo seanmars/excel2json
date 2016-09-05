@@ -26,8 +26,8 @@
   },
   "homepage": "https://github.com/seanmars/excel2json.git",
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^2.5.3",
-    "should": "^9.0.2"
+    "chai": "latest",
+    "mocha": "latest",
+    "should": "latest"
   }
 }
