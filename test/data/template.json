@@ -2,7 +2,11 @@
     "key": "id",
     "attributes": {
         "value": "value",
-        "name": "name"
+        "name": "name",
+        "array": [
+            "value",
+            "name"
+        ]
     },
     "array": [
         "value",
@@ -10,7 +14,11 @@
         {
             "value": "value",
             "name": "name"
-        }
+        },
+        [
+            "value",
+            "name"
+        ]
     ],
     "price": "value"
 }
