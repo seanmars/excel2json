@@ -51,6 +51,54 @@ describe('#loadSheet()', function () {
             });
         });
     });
+
+    // ods
+    describe('when type is ods', function () {
+        describe('when file is NOT exist', function () {
+            it('should throw expect', function (done) {
+                var filePath = './test/data/none.ods';
+                should.throws(() => e2jt.loadSheet(filePath, 'test'));
+
+                done();
+            });
+        });
+
+        describe('when sheet is exist', function () {
+            it('should return undefined', function (done) {
+                var sheet = e2jt.loadSheet('./test/data/test.ods', 'none');
+                should(sheet).not.ok();
+
+                done();
+            });
+        });
+
+        describe('when sheet is NOT exist', function () {
+            it('should return sheet object', function (done) {
+                var sheet = e2jt.loadSheet('./test/data/test.ods', 'test');
+                should(sheet).ok();
+
+                done();
+            });
+        });
+
+        describe('without parameter [filePath] and [sheetName]', function () {
+            it('should return undefined', function (done) {
+                var sheet = e2jt.loadSheet();
+                should(sheet).not.ok();
+
+                done();
+            });
+        });
+
+        describe('without parameter [sheetName]', function () {
+            it('should return undefined', function (done) {
+                var sheet = e2jt.loadSheet('./test/data/test.ods');
+                should(sheet).not.ok();
+
+                done();
+            });
+        });
+    });
 });
 
 // #loadTemplate()
