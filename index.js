@@ -33,10 +33,10 @@ var excel2jsontemplate = (function () {
      *
      * @method loadSheet
      *
-     * @param  {string}  filePath
-     * @param  {string}  sheetName
+     * @param {string} filePath
+     * @param {string} sheetName
      *
-     * @return Object
+     * @return {Object} Object of sheet.
      */
     function loadSheet(filePath, sheetName) {
         if (_u.isEmpty(filePath) || _u.isEmpty(sheetName)) {
@@ -68,9 +68,9 @@ var excel2jsontemplate = (function () {
      *
      * @method factoryCell
      *
-     * @param  {Object} cell_address [{ c: column, r: row }]
-     * @param  {string} z_value [number format string associated with the cell]
-     * @param  {Object} rawCell [Raw cell object]
+     * @param {Object} cell_address [{ c: column, r: row }]
+     * @param {string} z_value [number format string associated with the cell]
+     * @param {Object} rawCell [Raw cell object]
      *
      * @return {Object} The cell Object
      */
@@ -97,8 +97,8 @@ var excel2jsontemplate = (function () {
      *
      * @method isNeedIgnore
      *
-     * @param  {Object} cell
-     * @param  {Array}  ignore cells
+     * @param {Object} cell
+     * @param {Array} ignore cells
      *
      * @return {Boolean}
      */
@@ -126,8 +126,8 @@ var excel2jsontemplate = (function () {
      *
      * @method isTag
      *
-     * @param  {Object} cell
-     * @param  {string} tagChar
+     * @param {Object} cell
+     * @param {string} tagChar
      *
      * @return {Boolean}
      */
@@ -152,9 +152,9 @@ var excel2jsontemplate = (function () {
      *
      * @method findTitleTagCell
      *
-     * @param  {Object} worksheet
-     * @param  {Object} range
-     * @param  {string} tagTitle
+     * @param {Object} worksheet
+     * @param {Object} range
+     * @param {string} tagTitle
      *
      * @return {Object} The cell of title.
      */
@@ -188,12 +188,12 @@ var excel2jsontemplate = (function () {
      *
      * @method findTagCells
      *
-     * @param   {Object} worksheet
-     * @param   {Object} range
-     * @param   {Object} endCell
-     * @param   {string} tagChar
+     * @param {Object} worksheet
+     * @param {Object} range
+     * @param {Object} endCell
+     * @param {string} tagChar
      *
-     * @return  {Array} The array of cell(s).
+     * @return {Array} The array of cell(s).
      */
     function findTagCells(worksheet, range, endCell, tagChar) {
         var cells = [];
@@ -226,12 +226,12 @@ var excel2jsontemplate = (function () {
      *
      * @method findTitleCells
      *
-     * @param  {Object} worksheet
-     * @param  {Object} range
-     * @param  {Object} titleCell
-     * @param  {Object} ignoreCells
+     * @param {Object} worksheet
+     * @param {Object} range
+     * @param {Object} titleCell
+     * @param {Object} ignoreCells
      *
-     * @return {Array}  The cells of title
+     * @return {Array} The cells of title
      */
     function findTitleCells(worksheet, range, titleCell, ignoreCells) {
         var cells = [];
@@ -268,10 +268,10 @@ var excel2jsontemplate = (function () {
      *
      * @method fetchAttrJson
      *
-     * @param   {Object} ws
-     * @param   {Array} attrCells
+     * @param {Object} ws
+     * @param {Array} attrCells
      *
-     * @return  {JSON} The JSON Object of attribute
+     * @return {JSON} The JSON Object of attribute.
      */
     function fetchAttrJson(ws, attrCells) {
         var cells = {};
@@ -411,13 +411,26 @@ var excel2jsontemplate = (function () {
      *
      * @method map
      *
-     * @param  {Object} data
-     * @param  {JSON}   template
+     * @param {Object} data
+     * @param {JSON} template
      *
      * @return {JSON} Mapped data.
      */
     function map(data, template) {
-        var obj = {};
+        var type = template.constructor;
+
+        var obj;
+        switch (type) {
+        case Array:
+            obj = [];
+            break;
+        case Object:
+            obj = {};
+            break;
+        default:
+            return data[template];
+        }
+
         for (var key in template) {
             if (!template.hasOwnProperty(key)) {
                 continue;
@@ -428,18 +441,43 @@ var excel2jsontemplate = (function () {
             case Array:
                 obj[key] = [];
                 for (var index in val) {
+                    var arrVal;
                     if (val.hasOwnProperty(index)) {
-                        obj[key].push(data[val[index]]);
+                        switch (val[index].constructor) {
+                        case Array:
+                            arrVal = map(data, val[index]);
+                            break;
+                        case Object:
+                            arrVal = map(data, val[index]);
+                            break;
+                        default:
+                            arrVal = data[val[index]];
+                            break;
+                        }
+
+                        obj[key].push(arrVal);
                     }
                 }
                 break;
-
             case Object:
-                obj[key] = map(data, val);
+                switch (type) {
+                case Array:
+                    obj.push(map(data, val));
+                    break;
+                case Object:
+                    obj[key] = map(data, val);
+                    break;
+                }
                 break;
-
             default:
-                obj[key] = data[val];
+                switch (type) {
+                case Array:
+                    obj.push(data[val]);
+                    break;
+                case Object:
+                    obj[key] = data[val];
+                    break;
+                }
                 break;
             }
         }
@@ -452,10 +490,10 @@ var excel2jsontemplate = (function () {
      *
      * @method transform
      *
-     * @param  {Array}  rawData
-     * @param  {JSON}   template
+     * @param {Array} rawData
+     * @param {JSON} template
      *
-     * @return {Array}  Array of JSON objects with template.
+     * @return {Array} Array of JSON objects with template.
      */
     function transform(rawData, template) {
         // init result object
