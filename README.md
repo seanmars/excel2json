@@ -3,7 +3,7 @@
 Export the data with JSON format from excel;
 
 - [Features](#features)
-- [How To Use](#howtouse)
+- [Usage](#usage)
 - [Todos](#todos)
 - [Change logs](#logs)
 
@@ -13,17 +13,18 @@ Export the data with JSON format from excel;
 - Export JSON with prettify or minify;
 - Custom JSON template;
 
-## <a name="howtouse"></a>How To Use
+## <a name="usage"></a>Usage
 
 ### Excel
 ---
-Tags:
+Tag:
 
 - \! => Ignore
     - Column == A, it will ignore all the same column and row;
     - Column != A, just ignore the same column;
 - \# => Title
     - The title of data in excel, it will transform to property's name of Object;
+- ^ => Top-level attributes
 
 ### Example
 ---
@@ -31,9 +32,9 @@ Tags:
 - Use code:
 ```javascript
 var e2jt = require('./index.js');
-e2jt.loadTemplate('path/template.json', function(err, jsonObj) {
-    var data = e2jt.parse('path/excel.xlsx', 'sheet name', jsonObj);
-    e2jt.save('path/to/output/data.json', data);
+e2jt.loadTemplate('./template/file/path/file.json', function (err, jsonObj) {
+    var data = e2jt.parse('./data/file/path/data.xlsx', 'sheet_name', jsonObj);
+    e2jt.save('path/to/output/output.json', data);
 });
 ```
 
@@ -52,6 +53,16 @@ e2jt -h
     - Use command to import file(list of file) and parse all of then;
 
 ## <a name="logs"></a>Change logs
+
+### 2016/09/06
+---
+FIXED
+
+- Now can use the recursively Object, Array in template file;
+
+OTHER
+
+- Add more test case;
 
 ### 2016/07/28
 ---
