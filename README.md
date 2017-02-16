@@ -25,6 +25,17 @@ Tag:
 - \# => Title
     - The title of data in excel, it will transform to property's name of Object;
 - ^ => Top-level attributes
+    - If use dict(--dict true), all the top-level attributes will be ignored.
+
+| A | B | C |
+|---|---|---|
+| ^ | key | value |
+
+- \~ => The name of key.
+
+| A | B |
+|---|---|
+| ~ | name of key |
 
 ### Template
 
@@ -57,6 +68,16 @@ e2jt -h
     - Use command to import file(list of file) and parse all of then;
 
 ## <a name="logs"></a>Change logs
+
+### 2017-02-17
+---
+FEATURE
+
+- 增加 CLI 選項，是否自動加入屬性 sheetname。--sheetname [true|false] default = false。
+- 增加 CLI 選項，輸出是否為 key-value。--dict [true|false] default = false。 NOTE: 設為 true 時，所有 Top-level attributes(^) 將會被忽略。
+- 增加 CLI 選項，資料列的 Key 名稱。--key <name of key>。
+- 增加 Tag:"~"，資料表中 Tag:"~" 欄位右邊的值會編譯成資料列的 Key 名稱。 NOTE: 此屬性的優先順序比 CLI 的 --key 低。
+- 資料列的 Key 名稱預設為 datas。
 
 ### 2017-02-16
 ---
