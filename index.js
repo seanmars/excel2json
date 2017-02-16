@@ -431,15 +431,18 @@ var excel2jsontemplate = (function () {
             return data[template];
         }
 
+        expr = /^\$/;
         for (var key in template) {
             if (!template.hasOwnProperty(key)) {
                 continue;
             }
 
+            var isValKey = expr.test(key);
+            var keyVal = isValKey ? map(data, key.replace('$', '')) : key;
             var val = template[key];
             switch (val.constructor) {
             case Array:
-                obj[key] = [];
+                obj[keyVal] = [];
                 for (var index in val) {
                     var arrVal;
                     if (val.hasOwnProperty(index)) {
@@ -454,8 +457,7 @@ var excel2jsontemplate = (function () {
                             arrVal = data[val[index]];
                             break;
                         }
-
-                        obj[key].push(arrVal);
+                        obj[keyVal].push(arrVal);
                     }
                 }
                 break;
@@ -465,7 +467,7 @@ var excel2jsontemplate = (function () {
                     obj.push(map(data, val));
                     break;
                 case Object:
-                    obj[key] = map(data, val);
+                    obj[keyVal] = map(data, val);
                     break;
                 }
                 break;
@@ -475,7 +477,7 @@ var excel2jsontemplate = (function () {
                     obj.push(data[val]);
                     break;
                 case Object:
-                    obj[key] = data[val];
+                    obj[keyVal] = data[val];
                     break;
                 }
                 break;
