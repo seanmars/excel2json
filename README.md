@@ -26,6 +26,10 @@ Tag:
     - The title of data in excel, it will transform to property's name of Object;
 - ^ => Top-level attributes
 
+### Template
+
+- \$ => Use $title_name can map the value to be key in json;
+
 ### Example
 ---
 
@@ -54,7 +58,35 @@ e2jt -h
 
 ## <a name="logs"></a>Change logs
 
-### 2016/09/06
+### 2017-02-16
+---
+FEATURE
+
+- 增加 $ 前導符號應用，在 Template 當中使用 ${title_name} 將可把數值編譯成 JSON 的 KEY。
+
+Template:
+
+```JSON
+{
+    "$id": {
+        "name": "name",
+        "age": "age"
+    }
+}
+```
+
+Output:
+
+```JSON
+{
+    "0001": {
+        "name": "Foobar",
+        "age": "23"
+    }
+}
+```
+
+### 2016-09-06
 ---
 FIXED
 
@@ -64,7 +96,7 @@ OTHER
 
 - Add more test case;
 
-### 2016/07/28
+### 2016-07-28
 ---
 FEATURE
 
@@ -80,18 +112,18 @@ OTHER
 
 - 引入 mochajs 增加 Unit test;
 
-### 2016/07/09
+### 2016-07-09
 ---
 - Refactoring some code;(rename, add some check...)
 
-### 2016/07/09
+### 2016-07-09
 ---
 - Add CLI;
 
-### 2016/07/08
+### 2016-07-08
 ---
 - Update the parse function, now can input empyt or null template, it will direct parse(no any transform) all the title in excel to JSON;
 
-### 2016/07/06
+### 2016-07-06
 ---
 - Add feature custom template;
