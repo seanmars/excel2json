@@ -19,7 +19,10 @@ cmder.version(pkg.version)
     .option('-s, --space <space>', 'The white space to insert into the output JSON string for readability purposes')
     .option('-t, --template <template>', 'The file path of JSON template')
     .option('-o, --outputdir <outputdir>', 'The path of output folder')
-    .action(function(file, sheet, output) {
+    .option('--key <name of key>', 'The name of key for data list')
+    .option('--sheetname [true|false]', 'Auto add sheet name.[true|false]', /^(true|false)$/i, false)
+    .option('--dict [true|false]', 'Is key-value JSON?[true|false]', /^(true|false)$/i, false)
+    .action(function (file, sheet, output) {
         inputFile = file;
         inputSheet = sheet ? sheet : path.basename(file, path.extname(file));
         outputFile = (output ? output : inputSheet) + '.json';
@@ -38,16 +41,23 @@ if (cmder.template) {
     parseCallback();
 }
 
-function parseCallback(err, jsonObj) {
+function parseCallback(err, templateJson) {
     if (err) {
         throw err;
     }
 
     var fp = path.resolve(inputFile);
-    var data = e2jt.parse(fp, inputSheet, jsonObj);
+    var data = e2jt.parse(fp, inputSheet, templateJson, {
+        nameOfKey: cmder.key,
+        isKeyVal: cmder.dict,
+        isAddSheetName: cmder.sheetname
+    });
     var opdir = cmder.outputdir || path.dirname(inputFile);
+    var space = {
+        spaces: Number(cmder.space) || 0
+    };
     outputFile = path.resolve(path.join(opdir, outputFile));
-    e2jt.save(outputFile, data, function(err) {
+    e2jt.save(outputFile, data, space, function (err) {
         if (err) {
             console.log(err);
             return;

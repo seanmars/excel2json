@@ -11,6 +11,9 @@
  */
 
 var excel2jsontemplate = (function () {
+    const DEFAULT_ATTR_SHEETNAME = 'sheetname';
+    const DEFAULT_ATTR_DATAS = 'datas';
+
     function InitException(message) {
         this.message = message;
         this.name = 'InitException';
@@ -295,6 +298,29 @@ var excel2jsontemplate = (function () {
     }
 
     /**
+     * fetch name of key
+     *
+     * @method fetchNameOfKeyJson
+     *
+     * @param {Object} ws
+     * @param {Array} cells
+     *
+     * @return {string} name of key.
+     */
+    function fetchNameOfKeyJson(ws, cells) {
+        for (var cell of cells) {
+            var valAddr = {
+                c: cell.c + 1,
+                r: cell.r
+            };
+
+            var zVal = XLSX.utils.encode_cell(valAddr);
+
+            return ws[zVal].v;
+        }
+    }
+
+    /**
      * fetch raw data(s)
      *
      * @method fetchRawData
@@ -361,11 +387,12 @@ var excel2jsontemplate = (function () {
      * @param {string} sheetName
      * @param {string} tagTitle
      * @param {string} tagAttribute
+     * @param {string} tagNameOfKey
      * @param {string} tagIgnore
      *
      * @return {JSON} result The data of JSON.
      */
-    function parseSheet(filePath, sheetName, tagTitle, tagAttribute, tagIgnore) {
+    function parseSheet(filePath, sheetName, tagTitle, tagAttribute, tagNameOfKey, tagIgnore) {
         var ws = loadSheet(filePath, sheetName);
         if (!ws) {
             return;
@@ -387,6 +414,8 @@ var excel2jsontemplate = (function () {
         var attrCells = findTagCells(ws, range, titleCell, tagAttribute);
         // find all tag of ignore cells
         var ignoreCells = findTagCells(ws, range, titleCell, tagIgnore);
+        // find all tag of name of key cells
+        var nameOfKeyCells = findTagCells(ws, range, titleCell, tagNameOfKey);
 
         // find all titles with titleCell
         var titles = findTitleCells(ws, range, titleCell, ignoreCells);
@@ -396,11 +425,14 @@ var excel2jsontemplate = (function () {
 
         // fetch all attribute cell(s)
         var attrs = fetchAttrJson(ws, attrCells);
+        // fetch name of key
+        var nameOfKey = fetchNameOfKeyJson(ws, nameOfKeyCells);
 
         // fetch all raw datas
         var rawDatas = fetchRawData(ws, range, titleCell, titles, ignoreCells);
 
         return {
+            nameOfKey: nameOfKey,
             attrs: attrs,
             rawDatas: rawDatas
         };
@@ -413,10 +445,11 @@ var excel2jsontemplate = (function () {
      *
      * @param {Object} data
      * @param {JSON} template
+     * @param {Boolean} isKeyVal
      *
      * @return {JSON} result Mapped data.
      */
-    function map(data, template) {
+    function map(data, template, isKeyVal) {
         var type = template.constructor;
 
         var obj;
@@ -482,6 +515,11 @@ var excel2jsontemplate = (function () {
                 }
                 break;
             }
+
+            if (isKeyVal) {
+                obj._key = keyVal;
+                obj._val = obj[keyVal];
+            }
         }
 
         return obj;
@@ -494,12 +532,13 @@ var excel2jsontemplate = (function () {
      *
      * @param {Array} rawData
      * @param {JSON} template
+     * @param {Boolean} isKeyVal
      *
      * @return {Array} result Array of JSON objects with template.
      */
-    function transform(rawData, template) {
+    function transform(rawData, template, isKeyVal) {
         // init result object
-        var result = [];
+        var result = isKeyVal ? {} : [];
 
         // foreach data to mapping to template
         for (var index in rawData) {
@@ -508,8 +547,12 @@ var excel2jsontemplate = (function () {
             }
 
             // mapping
-            var obj = map(rawData[index], template);
-            result.push(obj);
+            var obj = map(rawData[index], template, isKeyVal);
+            if (isKeyVal) {
+                result[obj._key] = obj._val;
+            } else {
+                result.push(obj);
+            }
         }
 
         return result;
@@ -523,16 +566,26 @@ var excel2jsontemplate = (function () {
      * @param {string} filePath
      * @param {string} sheetName
      * @param {JSON} template
-     * @param {string} tagTitle [default = '#']
-     * @param {string} tagAttribute [default = '^']
-     * @param {string} tagIgnore [default = '!']
+     * @param {Object} options
+     * @param {Boolean} options.useSheetname = false
+     * @param {Boolean} options.isKeyVal = false
+     * @param {string} options.tagTitle = '#'
+     * @param {string} options.tagAttribute = '^'
+     * @param {string} options.tagNameOfKey = '~'
+     * @param {string} options.tagIgnore = '!'
      *
      * @return {Object} The JSON Object of data
      */
-    function parse(filePath, sheetName, template, tagTitle, tagAttribute, tagIgnore) {
-        tagTitle = tagTitle || '#';
-        tagAttribute = tagAttribute || '^';
-        tagIgnore = tagIgnore || '!';
+    function parse(filePath, sheetName, template, options) {
+        options = options || {};
+
+        nameOfKey = options.nameOfKey;
+        isAddSheetName = options.isAddSheetName || false;
+        isKeyVal = options.isKeyVal || false;
+        tagTitle = options.tagTitle || '#';
+        tagAttribute = options.tagAttribute || '^';
+        tagNameOfKey = options.tagNameOfKey || '~';
+        tagIgnore = options.tagIgnore || '!';
 
         // check sheet name is empty or not
         if (!sheetName) {
@@ -546,7 +599,8 @@ var excel2jsontemplate = (function () {
         }
 
         // get data
-        var objJson = parseSheet(filePath, sheetName, tagTitle, tagAttribute, tagIgnore);
+        var objJson = parseSheet(filePath, sheetName,
+            tagTitle, tagAttribute, tagNameOfKey, tagIgnore);
         objJson = objJson || {
             attrs: {},
             rawDatas: []
@@ -554,14 +608,17 @@ var excel2jsontemplate = (function () {
 
         // copy top-level attribute
         var result = objJson.attrs;
-        // transform the name attribute
-        if (!_u.isEmpty(objJson.attrs) && result.hasOwnProperty('name')) {
-            result.name = result.name;
-        } else {
-            result['name'] = sheetName;
+        if (isAddSheetName) {
+            result[DEFAULT_ATTR_SHEETNAME] = sheetName;
         }
         // transform the data if necessary
-        result.datas = _u.isEmpty(template) ? objJson.rawDatas : transform(objJson.rawDatas, template);
+        datas = _u.isEmpty(template) ? objJson.rawDatas : transform(objJson.rawDatas, template, isKeyVal);
+        if (isKeyVal) {
+            result = datas;
+        } else {
+            nameOfKey = nameOfKey ? nameOfKey : (objJson.nameOfKey || DEFAULT_ATTR_DATAS);
+            result[nameOfKey] = datas;
+        }
 
         return result;
     }
