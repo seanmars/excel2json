@@ -135,9 +135,9 @@ describe('#loadTemplate', function () {
             should(jsonObj.array[3][1]).be.eql('name');
 
             should(jsonObj.price).be.eql('value');
-
-            done();
         });
+
+        done();
     });
 });
 
@@ -179,10 +179,10 @@ describe('#parse()', function () {
                     should(data.datas[i].array[3][0]).be.eql(data.datas[i].attributes.value);
                     should(data.datas[i].array[3][1]).be.eql(data.datas[i].attributes.name);
                 }
-
-                done();
             }
         });
+
+        done();
     });
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "excel-to-json-template",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Translate excel to json with template.",
   "main": "index.js",
   "scripts": {
@@ -12,12 +12,12 @@
   "author": "Sean Mars",
   "license": "MIT",
   "dependencies": {
-    "cli-color": "^1.1.0",
-    "commander": "^2.9.0",
-    "jsonfile": "^2.3.1",
-    "lodash": "^4.13.1",
-    "underscore": "^1.8.3",
-    "xlsx": "^0.8.0"
+    "cli-color": "^2.0.0",
+    "commander": "^8.1.0",
+    "jsonfile": "^6.1.0",
+    "lodash": "^4.17.21",
+    "underscore": "^1.13.1",
+    "xlsx": "^0.17.1"
   },
   "keywords": [],
   "repository": {
