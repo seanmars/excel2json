@@ -12,12 +12,12 @@
   "author": "Sean Mars",
   "license": "MIT",
   "dependencies": {
-    "cli-color": "^2.0.0",
-    "commander": "^8.1.0",
+    "cli-color": "^2.0.3",
+    "commander": "^9.4.1",
     "jsonfile": "^6.1.0",
     "lodash": "^4.17.21",
-    "underscore": "^1.13.1",
-    "xlsx": "^0.17.1"
+    "underscore": "^1.13.6",
+    "xlsx": "^0.18.5"
   },
   "keywords": [],
   "repository": {
@@ -26,8 +26,8 @@
   },
   "homepage": "https://github.com/seanmars/excel2json.git",
   "devDependencies": {
-    "chai": "latest",
-    "mocha": "latest",
+    "chai": "^4.3.7",
+    "mocha": "^10.1.0",
     "should": "latest"
   }
 }
